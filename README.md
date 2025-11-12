@@ -21,11 +21,12 @@ El CIU busca medir la capacidad de un territorio para **aprender, adaptarse e in
 © 2025 Miguel A. Iñiguez McCormick — UrbanLab Facta Terrae
 
 ## Cómo citar
-Iñiguez McCormick, M. A. (2025). *SmartCity SeqyTool v5.1 — Coeficiente de Inteligencia Urbana (CIU)* [Software]. UrbanLab Facta Terrae, Universidad de Guadalajara. Zenodo. https://doi.org/10.xxxx/zenodo.xxxxx
+Iñiguez McCormick, M. A. (2025). *SmartCity SeqyTool v5.1 — Coeficiente de Inteligencia Urbana (CIU)* [Software]. UrbanLab Facta Terrae, Universidad de Guadalajara. Zenodo. https://doi.org/10.5281/zenodo.17593484
 
 ## Contacto
 UrbanLab Facta Terrae  
-📧 contacto@urbanlabfactaterrae.org  
-🌐 [https://urbanlabfactaterrae.org](https://urbanlabfactaterrae.org)
+📧 hola@factaterrae.com 
+🌐 [https://www.factaterrae.com)
+
 
 
