@@ -1,0 +1,628 @@
+<!doctype html>
+
+<!--
+SmartCity SeqyTool v5.1 — Coeficiente de Inteligencia Urbana (CIU)
+Copyright (C) 2025 Miguel A. Iñiguez McCormick
+Licencia GPL v3: https://www.gnu.org/licenses/gpl-3.0.txt
+-->
+
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SmartCity SeqyTool v5.1 — Índice Integral de Madurez Territorial</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#0b1020; --bg2:#0a0f24; --panel:#121933; --panel2:#0f1630; --ink:#e7ecff; --muted:#a9b3d4; --brand1:#6ee7ff; --brand2:#8b5cf6; --ok:#10b981; --warn:#f59e0b; --bad:#ef4444;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    .wrap{max-width:1200px;margin:0 auto;padding:16px}
+
+    header{position:sticky;top:0;z-index:50;background:linear-gradient(90deg,rgba(139,92,246,.25),rgba(110,231,255,.25));backdrop-filter:blur(8px);border-bottom:1px solid #223}
+    header .bar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px}
+    .logo-left,.logo-right{display:block}
+    .logo-left{height:56px;width:auto;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}
+    .logo-right{height:44px;width:auto;object-fit:contain;opacity:.9;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}
+    h1{font-size:22px;margin:0;font-weight:800;letter-spacing:.2px}
+    .sub{font-size:12px;color:var(--muted);margin-top:2px}
+    .btns{display:flex;align-items:center;gap:10px}
+    .primary{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;border:0;background:linear-gradient(90deg,var(--brand2),var(--brand1));color:#051225;font-weight:800;cursor:pointer}
+    .ghost{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid #2a355f;background:#0e1530;color:var(--ink);font-weight:700;cursor:pointer}
+
+    main{display:grid;grid-template-columns:360px 1fr;gap:16px;padding:16px}
+    .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid #1e2b54;border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+    .card .body{padding:16px}
+    h2{margin:0 0 10px 0;font-weight:800;font-size:16px}
+    h3{margin:18px 0 6px 0;font-weight:800;font-size:14px;color:var(--brand1)}
+    .muted{color:var(--muted)}
+    .input{width:100%;padding:10px;border-radius:10px;border:1px solid #2a355f;background:#0e1530;color:var(--ink)}
+    .grid{display:grid;gap:10px}
+    .grid-2{grid-template-columns:1fr 1fr}
+
+    /* TOC */
+    .toc a{display:block;padding:8px 10px;border:1px solid #24335f;border-radius:10px;color:var(--ink);text-decoration:none}
+    .toc a span{color:var(--muted)}
+    .toc a.active{
+      border-color: var(--brand1);
+      background: linear-gradient(90deg, rgba(139,92,246,.15), rgba(110,231,255,.10));
+      box-shadow: 0 0 0 2px rgba(110,231,255,.15) inset;
+    }
+    .toc a:focus-visible{
+      outline: 2px solid var(--brand1);
+      outline-offset: 2px;
+    }
+
+    /* Accordions */
+    details{border:1px solid #23315a;border-radius:12px;background:rgba(255,255,255,.02);margin:10px 0}
+    summary{cursor:pointer;padding:12px 14px;font-weight:800}
+
+    /* Indicadores */
+    .ind-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .ind{background:#0e1530;border:1px solid #2a355f;border-radius:12px;padding:10px}
+    .ind label{display:block;font-size:13px;color:var(--ink);margin-bottom:6px}
+    .ind .hint{font-size:11px;color:var(--muted);min-height:30px}
+    .ind .row{display:flex;align-items:center;gap:8px;margin-top:6px}
+    .ind input[type=range]{flex:1;accent-color:var(--brand2)}
+    .ind .val{width:28px;text-align:center;font-weight:800;color:var(--brand1)}
+
+    /* Resultados */
+    .scoreBox{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .bigScore{font-size:46px;font-weight:800}
+    .badge{font-weight:800}
+    .lvl-Naciente{color:var(--bad)}
+    .lvl-Emergente{color:var(--warn)}
+    .lvl-Establecido{color:var(--ok)}
+    .lvl-Líder{color:var(--brand1)}
+    .analysis{background:#0e1530;border:1px solid #2a355f;border-radius:12px;padding:12px}
+
+    footer{padding:18px;color:var(--muted);text-align:center}
+    footer .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    footer img{display:block}
+    
+    /* NUEVO: estilos de licencia CC en footer */
+    footer .license{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+      text-align:center;
+    }
+    footer .license a{ color:var(--ink); text-decoration:underline; }
+    footer .license .cc-ico{
+      max-width:1em; max-height:1em; vertical-align:middle; margin-left:.25em; opacity:.9;
+    }
+
+    /* Navegación y print */
+    html { scroll-behavior: smooth; }
+    details { scroll-margin-top: 96px; }
+
+    /* Navegación y print */
+    html { scroll-behavior: smooth; }
+    details { scroll-margin-top: 96px; } /* Compensa header fijo */
+    details.flash {
+      box-shadow: 0 0 18px 4px rgba(110,231,255,0.55);
+      border-color: var(--brand1);
+      transition: box-shadow 0.8s ease-out, border-color 0.8s ease-out;
+    }
+
+    /* Vista de impresión */
+    .print-only{display:none}
+    @media (max-width:1080px){main{grid-template-columns:1fr}.ind-grid{grid-template-columns:1fr 1fr}}
+    @media (max-width:720px){.ind-grid{grid-template-columns:1fr}}
+
+    @media print {
+      *{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+      body{background:white;color:#111}
+      header, main, footer{display:none}
+      .print-only{display:block !important}
+      .print-wrap{font-family:Inter,system-ui,sans-serif;padding:24pt;color:#111}
+      .print-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8pt}
+      .print-title{font-size:16pt;font-weight:800;margin:4pt 0}
+      .print-sub{color:#444;font-size:9pt;margin-bottom:12pt}
+      .print-meta{font-size:10pt;margin-bottom:8pt}
+      .kpi{display:flex;gap:12pt;flex-wrap:wrap;margin:8pt 0 12pt 0}
+      .kpi .box{border:1pt solid #ccc;border-radius:8pt;padding:8pt 10pt}
+      .img-row img{max-width:100%;height:auto;display:block;border:1pt solid #ddd;border-radius:6pt}
+      .tbl{width:100%;border-collapse:collapse;margin-top:10pt;font-size:10pt}
+      .tbl th,.tbl td{border:1pt solid #ccc;padding:6pt 8pt;text-align:left;vertical-align:top}
+      .tbl th{background:#f2f4f8}
+      .section{page-break-inside:avoid;margin-top:14pt}
+      .muted{color:#555}
+      .mb6{margin-bottom:6pt}
+      .mb10{margin-bottom:10pt}
+      .badge{font-weight:800}
+      .lvl-Naciente{color:#ef4444}
+      .lvl-Emergente{color:#b45309}
+      .lvl-Establecido{color:#047857}
+      .lvl-Líder{color:#0369a1}
+    }
+  </style>
+</head>
+<body>
+  <!-- HEADER -->
+  <header>
+    <div class="wrap bar">
+      <img src="https://www.factaterrae.com/webapp/urbanlab.png" alt="UrbanLab" class="logo-left"/>
+      <div>
+        <h1>SmartCity SeqyTool v5.1 — Coeficiente de Inteligencia Urbana (CIU)</h1>
+        <div class="sub">Autoevaluador basado en ISO 37122, PAS 181 y enfoques people-centered</div>
+      </div>
+      <div class="btns">
+        <button class="primary" id="btnCalc">Calcular índice</button>
+        <button class="ghost" id="btnPrint" title="Imprimir reporte con el resultado">Imprimir reporte</button>
+        <img src="https://www.factaterrae.com/webapp/geografia.png" alt="UdG Geografia" class="logo-right"/>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Columna izquierda: Registro + TOC -->
+    <section class="card">
+      <div class="body">
+        <h2>Registro y contacto</h2>
+        <p class="muted">Identifica la evaluación en el reporte. No se envía a ningún servidor.</p>
+        <div class="grid grid-2">
+          <div>
+            <label class="muted">Nombre del evaluador</label>
+            <input id="contact_name" class="input" placeholder="Ej. Funcionario"/>
+          </div>
+          <div>
+            <label class="muted">Institución / dependencia</label>
+            <input id="contact_institution" class="input" placeholder="Ej. Oficina de..."/>
+          </div>
+          <div>
+            <label class="muted">Correo electrónico</label>
+            <input id="contact_email" class="input" placeholder="correo@ejemplo.com"/>
+          </div>
+          <div>
+            <label class="muted">Ciudad / Territorio</label>
+            <input id="contact_city" class="input" placeholder="Ej. Zapopan"/>
+          </div>
+        </div>
+        <h3>Instrucciones de uso</h3>
+        <div class="analysis" style="margin-top:8px">
+          <p><b>Objetivo.</b> Estimar el nivel de madurez “smart” del territorio para orientar políticas, inversión y capacidades.</p>
+          <p><b>Quién responde.</b> Equipo técnico municipal o metropolitano. Si un ítem no aplica, deje 0.</p>
+          <p><b>Escala 0–5.</b> 0 inexistente, 1 intención, 2 piloto, 3 parcial, 4 consolidado, 5 institucionalizado con KPIs.</p>
+          <p><b>Cómo.</b> Abra cada pilar, lea la descripción, mueva el control y verifique el número a la derecha. Use evidencia cuando sea posible.</p>
+          <p><b>Calcular.</b> El botón genera puntaje por pilar, total, nivel y análisis automático con fortalezas, rezagos y recomendaciones.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="body">
+        <h2>Tabla de contenido</h2>
+        <p class="muted">12 pilares · 34 indicadores (0 = inexistente, 5 = consolidado)</p>
+        <div id="toc" class="grid toc"></div>
+      </div>
+    </section>
+
+    <!-- Columna derecha: Resultados -->
+    <section class="card" style="grid-column:2 / -1">
+      <div class="body">
+        <h2>Resultados</h2>
+        <div class="scoreBox">
+          <div>
+            <div class="muted">Puntaje total</div>
+            <div class="bigScore" id="totalScore">0</div>
+            <div class="badge" id="levelBadge">Nivel: —</div>
+            <div id="pillarsSummary" class="muted" style="margin-top:6px"></div>
+          </div>
+          <canvas id="radar" height="220" aria-label="Gráfica de radar"></canvas>
+        </div>
+        <h3>Análisis automático</h3>
+        <div id="analysisBox" class="analysis muted">Complete los indicadores y presione “Calcular índice”.</div>
+      </div>
+    </section>
+
+    <!-- Pilares -->
+    <section class="card" style="grid-column:1 / -1">
+      <div class="body">
+        <h2>Evaluación por pilares</h2>
+        <div id="pillarsRoot"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap row">
+      <div class="row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%">
+        <img src="https://www.factaterrae.com/webapp/geografia.png" alt="Sello" style="height:44px;opacity:.9"/>
+        <div>SmartCity SeqyTool · v5.1 · UrbanLab Facta Terrae · Departamento de Geografía Universidad de Guadalajara</div>
+        <img src="https://www.factaterrae.com/webapp/urbanlab.png" alt="UrbanLab" style="height:56px;opacity:.95"/>
+      </div>
+    </div>
+    
+    <!-- NUEVO: licencia CC -->
+  <div class="wrap">
+    <div class="license">
+      <a href="https://www.factaterrae.com/webapp/index.html">SmartCity SeqyTool v5.1 — Coeficiente de Inteligencia Urbana (CIU)</a>
+      © 2025 by
+      <a href="https://www.linkedin.com/in/miguel-mccormick-685a8113/">miguel angel iniguez mccormick</a>
+      is licensed under
+      <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/">CC BY-NC-ND 4.0</a>
+      <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="CC" class="cc-ico">
+      <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="BY" class="cc-ico">
+      <img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="NC" class="cc-ico">
+      <img src="https://mirrors.creativecommons.org/presskit/icons/nd.svg" alt="ND" class="cc-ico">
+    </div>
+  </div>
+  </footer>
+  
+  <p style="font-size:0.8em; color:#999;">
+© 2025 Miguel A. Iñiguez McCormick — SmartCity SeqyTool v5.1: Coeficiente de Inteligencia Urbana (CIU).  
+Licenciado bajo <a href="https://www.gnu.org/licenses/gpl-3.0.txt" target="_blank">GNU GPLv3</a>.  
+Documentación bajo <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a>.
+</p>
+
+  <!-- CONTENIDO SOLO PARA IMPRESIÓN -->
+  <div id="printArea" class="print-only">
+    <div class="print-wrap" id="printRoot">
+      <!-- Se llena dinámicamente antes de imprimir -->
+    </div>
+  </div>
+
+<script>
+/* =======================
+   MODELO DE INDICADORES
+   ======================= */
+const MODEL = [
+  { key:'gov',  icon:'🌐', title:'Gobernanza y Datos Abiertos', desc:'Transparencia, políticas de datos, participación digital.',
+    items:[
+      {id:'open_portal', label:'Portal de datos abiertos', hint:'Frecuencia de actualización, metadatos y reutilización.'},
+      {id:'data_policy', label:'Política de datos y privacidad', hint:'Alineada a ISO/GDPR/LGPD y normativa local.'},
+      {id:'open_budget', label:'Presupuesto y contratos abiertos', hint:'Publicación proactiva y formatos abiertos.'}
+    ]},
+  { key:'mob',  icon:'🚦', title:'Movilidad y Accesibilidad', desc:'Transporte público abierto, seguridad vial y modos activos.',
+    items:[
+      {id:'gtfs', label:'Datos de transporte (GTFS)', hint:'Estático y, de ser posible, tiempo real.'},
+      {id:'active_modes', label:'Movilidad activa', hint:'Infraestructura y uso de caminar y bicicleta.'},
+      {id:'road_safety', label:'Plan de seguridad vial', hint:'Metas, indicadores y seguimiento anual.'}
+    ]},
+  { key:'env',  icon:'🌳', title:'Ambiente y Resiliencia', desc:'Monitoreo ambiental, áreas verdes y alertas tempranas.',
+    items:[
+      {id:'air', label:'Monitoreo de calidad del aire', hint:'Red operativa y datos abiertos.'},
+      {id:'green', label:'Áreas verdes accesibles', hint:'Cobertura y proximidad (300 m recomendados).'},
+      {id:'early', label:'Alerta temprana multirriesgo', hint:'Protocolos y simulacros multiagencia.'}
+    ]},
+  { key:'eco',  icon:'💼', title:'Economía y Empleo TIC', desc:'Base productiva digital, emprendimiento e I+D.',
+    items:[
+      {id:'ict_jobs', label:'Empleo TIC', hint:'Proporción de trabajadores en TIC.'},
+      {id:'startups', label:'Innovación y startups', hint:'Programas govtech, incubadoras y sandboxes.'},
+      {id:'rd', label:'I+D local', hint:'Gasto y proyectos de investigación aplicada.'}
+    ]},
+  { key:'peo',  icon:'👥', title:'Personas (Educación, Inclusión)', desc:'Capital humano y participación efectiva.',
+    items:[
+      {id:'dig_lit', label:'Alfabetización digital', hint:'Cobertura y continuidad de programas.'},
+      {id:'higher_ed', label:'Educación superior en TIC', hint:'Oferta y vinculación con gobierno y empresas.'},
+      {id:'particip', label:'Participación ciudadana', hint:'Uso de plataformas y trazabilidad de respuestas.'}
+    ]},
+  { key:'srv',  icon:'🏙️', title:'Servicios Urbanos Digitales', desc:'Trámites, agua, alumbrado e interoperabilidad.',
+    items:[
+      {id:'one_stop', label:'Ventanilla única digital', hint:'Trámites prioritarios y experiencia de usuario.'},
+      {id:'smart_water', label:'Gestión inteligente del agua', hint:'Telemetría, pérdidas y calidad.'},
+      {id:'interop', label:'Interoperabilidad', hint:'APIs, catálogos y estándares comunes.'}
+    ]},
+  { key:'net',  icon:'🖧', title:'Infraestructura Digital', desc:'Conectividad, edge/cloud y ciberseguridad.',
+    items:[
+      {id:'coverage', label:'Cobertura de fibra/5G', hint:'Alcance poblacional y territorial.'},
+      {id:'edge', label:'Edge/Cloud municipal', hint:'Arquitectura para datos y servicios urbanos.'},
+      {id:'cyber', label:'Gobierno de ciberseguridad', hint:'Roles, continuidad y pruebas.'}
+    ]},
+  { key:'sec',  icon:'🛡️', title:'Seguridad y Bienestar', desc:'Prevención, tele-salud y coordinación de emergencias.',
+    items:[
+      {id:'open_safety', label:'Datos abiertos de seguridad', hint:'911/equivalente con categorización y anonimización.'},
+      {id:'telehealth', label:'Salud digital y telemedicina', hint:'Cobertura, protocolos y referenciación.'},
+      {id:'emergencies', label:'Gestión de emergencias', hint:'Multiactor, simulacros y tiempos de respuesta.'}
+    ]},
+  { key:'inc',  icon:'♿', title:'Inclusión y Equidad Digital', desc:'Acceso, brecha de género y accesibilidad universal.',
+    items:[
+      {id:'access', label:'Acceso equitativo', hint:'Wi-Fi público, dispositivos y tarifas sociales.'},
+      {id:'gender', label:'Brecha de género digital', hint:'Uso, habilidades y liderazgo femenino.'},
+      {id:'a11y', label:'Accesibilidad universal (WCAG)', hint:'Cumplimiento en portales y servicios.'}
+    ]},
+  { key:'eth',  icon:'🔐', title:'Ética de Datos & Ciberseguridad', desc:'Privacidad por diseño, consentimiento y auditorías.',
+    items:[
+      {id:'privacy', label:'Protección de datos personales', hint:'PIA/DPIA, minimización y gobernanza.'},
+      {id:'consent', label:'Consentimiento informado', hint:'Transparencia, revocación y trazabilidad.'},
+      {id:'audit', label:'Ciberresiliencia y auditorías', hint:'Pentesting y certificaciones periódicas.'}
+    ]},
+  { key:'cap',  icon:'🧩', title:'Capacidades Institucionales', desc:'Habilidades, trabajo transversal y cultura de datos.',
+    items:[
+      {id:'skills', label:'Formación del personal', hint:'Horas/año, itinerarios y certificaciones.'},
+      {id:'x_teams', label:'Gestión interdepartamental', hint:'Equipos y rituales de coordinación.'}
+    ]},
+  { key:'fin',  icon:'💰', title:'Finanzas & PPP', desc:'Sostenibilidad financiera y alianzas público-privadas.',
+    items:[
+      {id:'ppp', label:'Esquemas APP sostenibles', hint:'Marco, transparencia e incentivos.'},
+      {id:'green', label:'Finanzas verdes', hint:'Fondos climáticos, bonos verdes, multilaterales.'}
+    ]}
+];
+
+/* ==========
+   UTILIDADES
+   ========== */
+function el(tag,attrs={},children=[]) {
+  const n=document.createElement(tag);
+  Object.entries(attrs).forEach(([k,v])=>{
+    if(k==='class') n.className=v; else if(k==='href') n.setAttribute('href',v); else n.setAttribute(k,v)
+  });
+  children.forEach(c=> n.append(c));
+  return n;
+}
+
+/* =======================
+   TOC + NAVEGACIÓN SINCR
+   ======================= */
+let TOC_LINKS = new Map();
+
+function flashHighlight(el){
+  el.classList.add('flash');
+  setTimeout(()=> el.classList.remove('flash'), 1200);
+}
+
+function setActiveTOC(id){
+  TOC_LINKS.forEach((a, key) => a.classList.toggle('active', key === id));
+}
+
+function gotoSection(id){
+  const det = document.getElementById(id);
+  if(!det) return;
+  document.querySelectorAll('#pillarsRoot details').forEach(d => { if(d!==det) d.open = false; });
+  det.open = true;
+  det.scrollIntoView({behavior:'smooth', block:'start'});
+  flashHighlight(det);
+  history.replaceState(null, '', '#'+id);
+  setActiveTOC(id);
+}
+
+function buildTOC(){
+  const toc=document.getElementById('toc'); toc.innerHTML='';
+  TOC_LINKS = new Map();
+  MODEL.forEach((p)=>{
+    const id = 'p_'+p.key;
+    const a=el('a',{href:'#'+id},[`${p.icon} ${p.title} `, el('span',{},[`· ${p.items.length} ind.`])]);
+    a.addEventListener('click',(ev)=>{ ev.preventDefault(); gotoSection(id); });
+    toc.append(a);
+    TOC_LINKS.set(id, a);
+  });
+}
+
+function observePillars(){
+  const headerOffset = 96;
+  const obs = new IntersectionObserver((entries)=>{
+    const visible = entries.filter(e=>e.isIntersecting).sort((a,b)=> b.intersectionRatio - a.intersectionRatio)[0];
+    if(visible){ setActiveTOC(visible.target.id); }
+  },{
+    root:null,
+    rootMargin:`-${headerOffset}px 0px -70% 0px`,
+    threshold:[0.25,0.5,0.75]
+  });
+  document.querySelectorAll('#pillarsRoot details').forEach(det => obs.observe(det));
+}
+
+function bindDetailsToggle(){
+  document.querySelectorAll('#pillarsRoot details').forEach(det=>{
+    det.addEventListener('toggle', ()=>{
+      if(det.open){
+        document.querySelectorAll('#pillarsRoot details').forEach(d=>{ if(d!==det) d.open = false; });
+        setActiveTOC(det.id);
+      }
+    });
+  });
+}
+
+/* =======================
+   RENDER DE PILARES
+   ======================= */
+function buildPillars(){
+  const root=document.getElementById('pillarsRoot'); root.innerHTML='';
+  MODEL.forEach((p)=>{
+    const det=el('details',{open:false,id:'p_'+p.key});
+    det.append(el('summary',{},[`${p.icon} ${p.title}`]));
+    det.append(el('p',{class:'muted'},[p.desc]));
+    const grid=el('div',{class:'ind-grid'});
+    p.items.forEach(it=>{
+      const box=el('div',{class:'ind'});
+      box.append(el('label',{},[it.label]));
+      box.append(el('div',{class:'hint'},[it.hint]));
+      const row=el('div',{class:'row'});
+      const slider=el('input',{type:'range',min:0,max:5,step:1,value:0,id:`${p.key}_${it.id}`});
+      const val=el('div',{class:'val',id:`val_${p.key}_${it.id}`},['0']);
+      slider.addEventListener('input',()=>{ val.textContent=slider.value; });
+      row.append(slider,val); box.append(row); grid.append(box);
+    });
+    det.append(grid); root.append(det);
+  });
+}
+
+/* =======================
+   CÁLCULO Y GRÁFICA
+   ======================= */
+function levelLabel(score){
+  if(score>=80) return ['Líder','lvl-Líder'];
+  if(score>=60) return ['Establecido','lvl-Establecido'];
+  if(score>=40) return ['Emergente','lvl-Emergente'];
+  return ['Naciente','lvl-Naciente'];
+}
+
+let radar;
+let LAST = null;
+
+function calc(){
+  const perPillar = MODEL.map(p=>{
+    let s=0, n=0;
+    p.items.forEach(it=>{
+      const v = Number(document.getElementById(`${p.key}_${it.id}`).value)||0; s+=v; n++;
+    });
+    return { key:p.key, title:p.title, icon:p.icon, score: n? (s/(n*5))*100 : 0 };
+  });
+  const total = perPillar.reduce((a,b)=> a+b.score, 0)/perPillar.length;
+  document.getElementById('totalScore').textContent = total.toFixed(1);
+  const [lvl, cls] = levelLabel(total);
+  const badge = document.getElementById('levelBadge'); badge.textContent = `Nivel: ${lvl}`; badge.className = `badge ${cls}`;
+
+  const sorted=[...perPillar].sort((a,b)=>b.score-a.score);
+  const top=sorted.slice(0,3).map(x=> `${x.icon} ${x.title}: ${x.score.toFixed(0)}`).join(' · ');
+  const low=sorted.slice(-3).map(x=> `${x.icon} ${x.title}: ${x.score.toFixed(0)}`).join(' · ');
+  document.getElementById('pillarsSummary').textContent = `Fortalezas: ${top} | Rezagos: ${low}`;
+
+  const labels = MODEL.map(p=> p.title);
+  const data   = perPillar.map(p=> p.score);
+  if(radar) radar.destroy();
+  radar = new Chart(document.getElementById('radar'), {
+    type:'radar',
+    data:{ labels, datasets:[{ label:'Puntaje por pilar', data, fill:true }]},
+    options:{ plugins:{ legend:{ display:false }}, scales:{ r:{ angleLines:{color:'#243'}, grid:{color:'#1b2446'}, pointLabels:{color:'#cfd8ff'}, suggestedMin:0, suggestedMax:100 }}}
+  });
+
+  const city = document.getElementById('contact_city').value || 'el territorio';
+  const name = document.getElementById('contact_name').value || 'equipo evaluador';
+  const inst = document.getElementById('contact_institution').value || '';
+  const mail = document.getElementById('contact_email').value || '';
+  const analysis=[];
+  analysis.push(`Resultado general para ${city}: <b>${lvl}</b> (${total.toFixed(1)}/100).`);
+  analysis.push(`Fortalezas: ${top}. Rezagos: ${low}.`);
+  const recs = sorted.slice(-3).map(w=>{
+    switch(w.key){
+      case 'gov': return 'Publicar política de datos y abrir contratos con metadatos consistentes.';
+      case 'mob': return 'Liberar GTFS y establecer metas de seguridad vial con seguimiento anual.';
+      case 'env': return 'Operar red de aire y protocolos de alerta temprana con datos abiertos.';
+      case 'eco': return 'Impulsar programas de emprendimiento govtech y vincular I+D a demanda pública.';
+      case 'peo': return 'Escalar alfabetización digital y trazabilidad de respuestas ciudadanas.';
+      case 'srv': return 'Consolidar ventanilla única con interoperabilidad (APIs) y estándares.';
+      case 'net': return 'Ampliar cobertura de fibra/5G y formalizar gobierno de ciberseguridad.';
+      case 'sec': return 'Abrir datos de seguridad y fortalecer simulacros multiagencia.';
+      case 'inc': return 'Reducir brechas de acceso y cumplir WCAG en servicios digitales.';
+      case 'eth': return 'Implementar privacidad por diseño y auditorías periódicas.';
+      case 'cap': return 'Aumentar horas de formación y equipos interdepartamentales.';
+      case 'fin': return 'Definir marcos APP transparentes y acceder a finanzas verdes.';
+      default: return 'Plan de mejora continua con coordinación interáreas.';
+    }
+  });
+  analysis.push('Recomendaciones prioritarias: ' + recs.join(' '));
+  const box = document.getElementById('analysisBox');
+  box.classList.remove('muted');
+  const contact = [name, inst, mail].filter(Boolean).join(' · ');
+  const contactLine = contact ? `<br><span class="muted">Contacto: ${contact}</span>` : '';
+  box.innerHTML = `<p>${analysis.join('</p><p>')}</p>${contactLine}`;
+
+  LAST = {
+    perPillar,
+    total: Number(total.toFixed(1)),
+    level: lvl,
+    strengthsText: top,
+    weaknessesText: low,
+    recommendations: recs,
+    contact: { name, inst, mail, city }
+  };
+}
+
+/* =======================
+   IMPRESIÓN (HTML print)
+   ======================= */
+async function printReport(){
+  calc(); // asegurar resultados actualizados
+  document.querySelectorAll('details').forEach(d=> d.open = true);
+
+  let radarDataURL = null;
+  const radarCanvas = document.getElementById('radar');
+  if(radarCanvas){ radarDataURL = radarCanvas.toDataURL('image/png',1.0); }
+
+  const leftLogo = document.querySelector('.logo-left');
+  const rightLogo = document.querySelector('.logo-right');
+  const leftSrc = leftLogo && leftLogo.src ? leftLogo.src : null;
+  const rightSrc = rightLogo && rightLogo.src ? rightLogo.src : null;
+
+  const root = document.getElementById('printRoot');
+  const c = LAST.contact;
+  const levelClass = {'Naciente':'lvl-Naciente','Emergente':'lvl-Emergente','Establecido':'lvl-Establecido','Líder':'lvl-Líder'}[LAST.level] || '';
+
+  root.innerHTML = `
+    <div class="print-header">
+      ${leftSrc ? `<img src="${leftSrc}" alt="UrbanLab" style="height:40pt">` : `<div></div>`}
+      ${rightSrc ? `<img src="${rightSrc}" alt="Sello" style="height:32pt">` : `<div></div>`}
+    </div>
+    <div class="print-title">SmartCity SeqyTool v5.1 — Reporte de Evaluación</div>
+    <div class="print-sub">Autoevaluador basado en ISO 37122, PAS 181 y enfoques people-centered · ${new Date().toLocaleString()}</div>
+
+    <div class="print-meta">
+      <div><b>Territorio:</b> ${c.city || '—'}</div>
+      <div><b>Contacto:</b> ${[c.name, c.inst, c.mail].filter(Boolean).join(' · ') || '—'}</div>
+    </div>
+
+    <div class="kpi">
+      <div class="box"><b>Puntaje total</b><div style="font-size:18pt;font-weight:800">${LAST.total}/100</div></div>
+      <div class="box"><b>Nivel</b><div class="badge ${levelClass}" style="font-size:14pt">${LAST.level}</div></div>
+    </div>
+
+    <div class="img-row section">
+      ${radarDataURL ? `<img src="${radarDataURL}" alt="Radar de resultados">` : ``}
+    </div>
+
+    <div class="section">
+      <table class="tbl">
+        <thead><tr><th>Pilar</th><th>%</th></tr></thead>
+        <tbody>
+          ${LAST.perPillar.map(p=>`
+            <tr>
+              <td>${p.icon} ${p.title}</td>
+              <td style="text-align:right">${p.score.toFixed(1)}%</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="mb6"><b>Fortalezas</b></div>
+      <div class="mb10">${LAST.strengthsText}.</div>
+      <div class="mb6"><b>Rezagos</b></div>
+      <div class="mb10">${LAST.weaknessesText}.</div>
+      <div class="mb6"><b>Recomendaciones prioritarias</b></div>
+      <div>${LAST.recommendations.join(' ')}</div>
+    </div>
+
+    <div class="section muted" style="margin-top:14pt;font-size:9pt">
+      SmartCity SeqyTool v5.1 · UrbanLab Facta Terrae · Ecoseva Institute
+    </div>
+  `;
+
+  const restoreAfterPrint = () => {
+    window.removeEventListener('afterprint', restoreAfterPrint);
+  };
+  window.addEventListener('afterprint', restoreAfterPrint);
+  window.print();
+}
+
+/* =======================
+   INICIALIZACIÓN
+   ======================= */
+function init(){
+  buildTOC();
+  buildPillars();
+
+  // enlaces
+  document.getElementById('btnCalc').addEventListener('click', calc);
+  document.getElementById('btnPrint').addEventListener('click', printReport);
+
+  // sincronización TOC <-> scroll/accordeones
+  observePillars();
+  bindDetailsToggle();
+
+  // Soporte de #hash al entrar
+  if(location.hash){
+    const id = location.hash.slice(1);
+    setTimeout(()=> gotoSection(id), 200);
+  }
+}
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', init);} else { init(); }
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "Si utilizas este software o metodología en tu investigación, por favor cita el trabajo usando la referencia siguiente."
+title: "SmartCity SeqyTool v5.1 — Índice Integral de Inteligencia Territorial"
+version: "5.1"
+type: software
+authors:
+  - family-names: "Iñiguez McCormick"
+    given-names: "Miguel A."
+    orcid: "https://orcid.org/0000-0002-4631-0042"  # (sustituir con tu ORCID real)
+affiliations:
+  - "UrbanLab Facta Terrae, Universidad de Guadalajara"
+date-released: 2025-11-12
+repository-code: "https://github.com/urbanlabfactaterrae/SeqyTool_v5.1"
+license: "GPL-3.0-only"
+keywords:
+  - "territorial intelligence"
+  - "smart cities"
+  - "geospatial analysis"
+  - "digital platforms"
+  - "urban governance"
+  - "GIS"
+abstract: >
+  SmartCity SeqyTool v5.1 es un modelo digital interactivo que evalúa el nivel de madurez territorial de municipios y regiones mediante una arquitectura multiescalar de indicadores. 
+  Desarrollado por Miguel A. Iñiguez McCormick, combina geografía digital, ciencia de datos y teoría del territorio inteligente para traducir la complejidad socioespacial en métricas dinámicas y visuales.
+  El proyecto forma parte del desarrollo metodológico de UrbanLab Facta Terrae y de la tesis doctoral en Geografía y Ordenamiento Territorial (Universidad de Guadalajara).
+repository-artifact: "https://zenodo.org/record/xxxxxxx"  # (se actualiza al publicar)
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Iñiguez McCormick"
+      given-names: "Miguel A."
+  title: "SmartCity SeqyTool v5.1 — Índice Integral de Inteligencia Territorial"
+  journal: "Zenodo Repository"
+  year: 2025
+  doi: "10.xxxx/zenodo.xxxxx"  # (sustituir con DOI real)
+  url: "https://doi.org/10.xxxx/zenodo.xxxxx"
+
