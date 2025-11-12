@@ -6,7 +6,7 @@ type: software
 authors:
   - family-names: "Iñiguez McCormick"
     given-names: "Miguel A."
-    orcid: "https://orcid.org/0000-0002-4631-0042"  # (sustituir con tu ORCID real)
+    orcid: "https://orcid.org/0000-0002-4631-0042"  # 
 affiliations:
   - "UrbanLab Facta Terrae, Universidad de Guadalajara"
 date-released: 2025-11-12
@@ -32,6 +32,7 @@ preferred-citation:
   title: "SmartCity SeqyTool v5.1 — Índice Integral de Inteligencia Territorial"
   journal: "Zenodo Repository"
   year: 2025
-  doi: "10.xxxx/zenodo.xxxxx"  # (sustituir con DOI real)
-  url: "https://doi.org/10.xxxx/zenodo.xxxxx"
+  doi: "10.5281/zenodo.17593484"  # 
+  url: "https://doi.org/10.5281/zenodo.17593484"
+
 
